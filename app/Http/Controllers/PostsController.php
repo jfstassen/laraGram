@@ -17,7 +17,10 @@ class PostsController extends Controller
     {
         $users = auth()->user()->following()->pluck("profiles.user_id");
         // dd($users);
-        $posts = Post::whereIn("user_id", $users)->latest()->get();
+        // N+1 problem:
+        // $posts = Post::whereIn("user_id", $users)->latest()->paginate(5);
+        // N+1 fixed: (with user() from post model)
+        $posts = Post::whereIn("user_id", $users)->with("user")->latest()->paginate(5);
         // dd($posts);
         return view("posts.index", compact("posts"));
 
